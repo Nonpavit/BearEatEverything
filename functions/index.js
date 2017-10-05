@@ -69,9 +69,13 @@ function receivedMessage(event) {
             } else if (checkHungry(messageText)) {
                 randomWhatToEat(senderID)
             } else if (checkRandomFoodFeedback(messageText)) {
-                saveUserFavManu(senderID)
-            } else if ("test") {
-                randomFoodService.log()
+                saveUserFavManu(senderID, messageText)
+            } else if (checkWhereToEat(messageText)) {
+                randonWhereToEat(senderID)
+            } else if ((messageText.search('กิน') >= 0) || (messageText.search('ยัง') >= 0)) {
+                sendTextMessage(senderID, "ก็มีแซลม่อนบินเข้าปากเรื่อยๆ ก็ไม่รู้วสินะ")
+            } else if ((messageText.search('ใคร') >= 0) || (messageText.search('ชื่อ') >= 0)) {
+                sendTextMessage(senderID, "ก็นุ้งหมีตัวแตกไง จะใครหล่ะ")
             } else {
                 sendTextMessage(senderID, "หมีเพิ่งเข้ามา กทม. ขอเวลาน้องหมีศึกษาภาษาไทยก่อนน๊า อุ๋ง")
             }
@@ -91,7 +95,8 @@ function checkHello(messageText) {
 
 function checkHelloBear(messageText) {
     return (messageText.search('หมีจ๋า') >= 0)
-        || (messageText.search('คุณหมี') >= 0);
+        || (messageText.search('คุณหมี') >= 0)
+        || (messageText.search('หมี') >= 0);
 }
 
 function checkManual(messageText) {
@@ -100,6 +105,7 @@ function checkManual(messageText) {
 
 function checkHungry(messageText) {
     return (messageText.search('สุ่ม') >= 0)
+        || (messageText.search('ได้') >= 0)
         || (messageText.search('hungry') >= 0)
         || (messageText.search('หิว') >= 0)
         || 
@@ -122,7 +128,19 @@ function checkHungry(messageText) {
 
 let isInRandomMode = false
 function randomWhatToEat(recipientId) {
-    let foodSample = ['กระเพราไก่ไข่ดาว', 'สุกี้ทะเล', 'ราดหน้ากุ้ง', 'ก๋วยเตี๋ยวคั่วไก่', 'ข้าวผัดปู']
+    let foodSample = ['กระเพราไก่ไข่ดาว', 'สุกี้แห้งทะเล', 'ราดหน้ากุ้ง', 'ก๋วยเตี๋ยวคั่วไก่', 
+        'ข้าวผัดปู', 'ไข่เจียวหมูสับ', 'มาม่าต้มยำ', 'ก๋วยเตี๋ยวหมูสับ', 'ปลาหมึกผัดไข่เค็ม',
+        'ยำวุ้นเส้นทะเล', 'ฉู่ฉี่ไข่เจียว', 'ไข่ระเบิด', 'ข้าวทะเลพริกไทยดำ', 'หมูกรอบผัดนํ้าพริกเผา',
+        'ข้าวผัดปลาสลิด', 'ข้าวผัดหอยลายนํ้าพริกเผา', 'มักกะโรนีผัด', 'ข้าวผัดกระหลํ่าปลีหมูใส่พริก', 'หมูผัดนํ้ามันหอย',
+        'ยำมาม่า', 'มาม่าปลากระป๋อง', 'ลาบหมู', 'ข้าวผัดแกงเขียวหวาน', 'ไก่ผัดเม็ดมะม่วง' , 'ปูผัดผงกระหรี่']
+    let rand = foodSample[Math.floor(Math.random() * foodSample.length)];
+    sendTextMessage(recipientId, rand)
+    sendTextMessage(recipientId, 'ชอบไหมจ๊ะ')
+    isInRandomMode = true
+}
+
+function randonWhereToEat(recipientId) {
+    let foodSample = ['KFC', 'Mc-Donald', 'Burger King', 'Coco Ichibanya', 'Yayoi', 'Bonchon', 'Pizza Hut']
     let rand = foodSample[Math.floor(Math.random() * foodSample.length)];
     sendTextMessage(recipientId, rand)
     sendTextMessage(recipientId, 'ชอบไหมจ๊ะ')
@@ -131,19 +149,42 @@ function randomWhatToEat(recipientId) {
 
 function checkRandomFoodFeedback(messageText) {
     return ((messageText.search('ชอบ') >= 0)
+            || (messageText.search('ได้') >= 0)
             || (messageText.search('ไม่') >= 0)
             || (messageText.search('yes') >= 0) 
             || (messageText.search('no') >= 0))
         && isInRandomMode;
 }
 
-function saveUserFavManu(recipientId) {
-    if (messageText.search('ชอบ') >= 0 || (messageText.search('yes') >= 0)) {
-        sendTextMessage(recipientId, 'ขอบคุณที่ชอบนะ หมีบันทึกเมนูที่ชอบใน database ให้แล้วนะ')
-    } else if (messageText.search('ไม่') >= 0 || (messageText.search('no') >= 0)) {
+function saveUserFavManu(recipientId, messageText) {
+    if (((messageText.search('ชอบ') >= 0) || (messageText.search('yes') >= 0)) 
+        && messageText.search('ไม่') == -1) {
+        //sendTextMessage(recipientId, 'ขอบคุณที่ชอบนะ หมีบันทึกเมนูที่ชอบใน database ให้แล้วนะ')
+        sendTextMessage(recipientId, 'ขอบคุณที่ชอบนะ')
+    } else if ((messageText.search('ไม่') >= 0) || (messageText.search('no') >= 0)) {
         sendTextMessage(recipientId, 'สุ่มอาหารใหม่ไหมเอ่ยย')
+    } else {
+        sendTextMessage(recipientId, 'ขอบคุณจ้า')
     }
     isInRandomMode = false
+}
+
+function checkWhereToEat(messageText) {
+    return (
+        (
+            (messageText.search('กิน') >= 0)
+            || (messageText.search('แดก') >= 0)
+            || (messageText.search('แดรก') >= 0)
+            || (messageText.search('ยัด') >= 0)
+            || (messageText.search('eat') >= 0)
+        ) 
+        && 
+        (
+            (messageText.search('ไหน') >= 0)
+            || (messageText.search('where') >= 0)
+        )
+        
+    );
 }
 
 function greeting(recipientId) {
