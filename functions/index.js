@@ -4,8 +4,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
+// Create and Deploy Your First Cloud Functions
+// https://firebase.google.com/docs/functions/write-firebase-functions
 //
 // exports.helloWorld = functions.https.onRequest((request, response) => {
 //  response.send("Hello from Firebase!");
@@ -60,6 +60,7 @@ function receivedMessage(event) {
         //ส่วนนี้ใช้ Switch case มาทำ rule-base คือดักคำมาทำงานแตกต่างกันไป
         //เรียกได้ว่าเป็นวิธีที่ basic และง่ายสุดในการทำบอทก็ว่าได้ 555
         if (messageText.toLowerCase()) {
+            messageText = messageText.toLowerCase()
             if (checkHello(messageText)) {
                 greeting(senderID)
             } else if (checkHelloBear(messageText)) {
@@ -81,7 +82,8 @@ function receivedMessage(event) {
             }
         }
     } else if (messageAttachments) {
-        sendTextMessage(senderID, "Message with attachment received");
+        //sendTextMessage(senderID, "Message with attachment received");
+        sendTextMessage(senderID, "หมีส่งรูปกับสติ๊กเกอร์ไม่เป็น สอนหมีหน่อยนะ");
     }
 }
 
@@ -90,6 +92,7 @@ function checkHello(messageText) {
         || (messageText.search('hi') >= 0)
         || (messageText.search('สวัสดี') >= 0)
         || (messageText.search('หวัดดี') >= 0)
+        || (messageText.search('ดีจ้า') >= 0)
         || (messageText.search('ทัก') >= 0);
 }
 
@@ -100,11 +103,14 @@ function checkHelloBear(messageText) {
 }
 
 function checkManual(messageText) {
-    return (messageText.search('ทำไรได้บ้าง') >= 0);
+    return (messageText.search('ทำไรได้บ้าง') >= 0)
+        || (messageText.search('ทำไรเป็นบ้าง') >= 0);
 }
 
 function checkHungry(messageText) {
-    return (messageText.search('สุ่ม') >= 0)
+    return (messageText.search('ไม่') == -1)
+        && ((messageText.search('สุ่ม') >= 0)
+        || (messageText.search('เอา') >= 0)
         || (messageText.search('ได้') >= 0)
         || (messageText.search('hungry') >= 0)
         || (messageText.search('หิว') >= 0)
@@ -123,7 +129,7 @@ function checkHungry(messageText) {
                 || (messageText.search('what') >= 0)
             )
             
-        );
+        ));
 }
 
 let isInRandomMode = false
@@ -158,9 +164,11 @@ function checkRandomFoodFeedback(messageText) {
 
 function saveUserFavManu(recipientId, messageText) {
     if (((messageText.search('ชอบ') >= 0) || (messageText.search('yes') >= 0)) 
-        && messageText.search('ไม่') == -1) {
+        && (messageText.search('ไม่') == -1)) {
         //sendTextMessage(recipientId, 'ขอบคุณที่ชอบนะ หมีบันทึกเมนูที่ชอบใน database ให้แล้วนะ')
         sendTextMessage(recipientId, 'ขอบคุณที่ชอบนะ')
+    } else if (( messageText.search('ไม่') >= 0) && ( messageText.search('สุ่ม') >= 0)) {
+         sendTextMessage(recipientId, 'ไม่เป็นไรจ้า')
     } else if ((messageText.search('ไม่') >= 0) || (messageText.search('no') >= 0)) {
         sendTextMessage(recipientId, 'สุ่มอาหารใหม่ไหมเอ่ยย')
     } else {
